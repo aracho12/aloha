@@ -14,7 +14,7 @@ class Cohpout:
     def __init__(self,
                  filepath='.',
                  d={},
-                 #element_index=0,
+                 element_index=0,
                 ):
         COHPCAR_path = filepath+"/COHPCAR.lobster"
         POSCAR_path = filepath+"/POSCAR"
@@ -26,7 +26,6 @@ class Cohpout:
         
         info={}
         completecohp=self.completecohp
-<<<<<<< HEAD
         
         for i in range(len(self.completecohp.bonds)):
             label=str(i+1)
@@ -81,70 +80,6 @@ class Cohpout:
                         d[label][elem]['d_orb']=[(n,"dxy"),(n,"dyz"),(n,"dz2"),(n,"dxz"),(n,"dx2")]
                     if n_orb == 'f':
                         d[label][elem]['f_orb']=[(n,"f_3"),(n,"f_2"),(n,"f_3"),(n,"f0"),(n,"f1"),(n,"f2"),(n,"f3")]
-=======
-        if str(type(self.completecohp)) == f"<class 'pymatgen.electronic_structure.cohp.Cohp'>":
-            icohps=self.completecohp.icohp
-            cohpd=self.completecohp.as_dict()
-            e_fermi=cohpd["efermi"]
-            energies=cohpd["energies"]
-            for i in range(len(energies)):
-                if energies[i] == e_fermi:
-                    icohp=icohps[Spin.up][i]
-            print("-ICOHP value at Fermi level: {}".format(-icohp))
-            d["icohp"]=icohp
-        else:
-            for i in range(len(self.completecohp.bonds)):
-                label=str(i+1)
-                info[label]={}
-                
-                """ finding element index based on POSCAR (therefore, started from 0) """
-                elem1=str(self.completecohp.bonds[label]['sites'][0]._species)[:-1]
-                elem2=str(self.completecohp.bonds[label]['sites'][1]._species)[:-1]
-                x1,y1,z1=self.completecohp.bonds[label]['sites'][0].coords
-                elem1_idx=[atom.index for atom in self.atoms if x1-0.01<atom.x<x1+0.01 and y1-0.01<atom.y<y1+0.01 and z1-0.01<atom.z<z1+0.01]
-                x2,y2,z2=self.completecohp.bonds[label]['sites'][1].coords
-                elem2_idx=[atom.index for atom in self.atoms if x2-0.01<atom.x<x2+0.01 and y2-0.01<atom.y<y2+0.01 and z2-0.01<atom.z<z2+0.01]
-                info[label][elem1+str(elem1_idx[0])]={}
-                info[label][elem2+str(elem2_idx[0])]={}
-                info[label]['pair']="{}({})-{}({})".format(elem1,elem1_idx[0],elem2,elem2_idx[0])    
-                """ bond length """
-                length=str(self.completecohp.bonds[label]['length'])
-                info[label]['length']=float(length)
-                
-                """ ICOHP value """
-                icohp=get_integrated_cohp_in_energy_range(self.completecohp,label)
-                info[label]['icohp']=float(icohp)
-                
-                """ print whole label and ICOHP values for all orbital """ 
-            db=[]
-            print("label \t pair    \t -ICOHP  \t distance ")
-            icohp_sum=[]
-            for label in info.keys():
-                print("{} \t {} \t {} \t {} \t".format(label,info[label]['pair'],round(float(-info[label]['icohp']),5),round(float(info[label]['length']),5)))
-                icohp_sum.append(round(float(-info[label]['icohp']),5))
-            print("\t -ICOHP sum:\t {} ".format(sum(icohp_sum)))
-            
-            d=info.copy()
-            """ """
-            for label in info.keys():
-                elements=[ele for ele in list(info[label].keys()) if ele not in ["icohp","pair","length"]]
-                d[label]['elements']=elements
-                for elem in elements:
-                    ele=element(rm_num(elem)).ec.conf
-                    ele_orb=list(ele.keys())
-                    d[label][elem]["tot_orb"]=ele_orb
-                    for i in range(len(ele_orb)):
-                        n=int(ele_orb[i][0])
-                        n_orb=ele_orb[i][1]
-                        if n_orb == 's':
-                            d[label][elem]['s_orb']=[(n,"s")]
-                        if n_orb == 'p':
-                            d[label][elem]['p_orb']=[(n,"px"),(n,"py"),(n,"pz")]
-                        if n_orb == 'd':
-                            d[label][elem]['d_orb']=[(n,"dxy"),(n,"dyz"),(n,"dz2"),(n,"dxz"),(n,"dx2")]
-                        if n_orb == 'f':
-                            d[label][elem]['f_orb']=[(n,"f_3"),(n,"f_2"),(n,"f_3"),(n,"f0"),(n,"f1"),(n,"f2"),(n,"f3")]
->>>>>>> 84760dc157bf306c53d3218de667009031c115b4
             self.d=d
 
 
@@ -332,10 +267,7 @@ class Cohpout:
         return self.d[label]['lm_orbital']
 
     def pcohp(self, label=None, lm_orbital=None, summed_spin_channels=True):
-<<<<<<< HEAD
         # Header 
-=======
->>>>>>> 84760dc157bf306c53d3218de667009031c115b4
         if isinstance(lm_orbital,dict):
             if summed_spin_channels:
                 print("label \t pair     \t -ICOHP     \t")
