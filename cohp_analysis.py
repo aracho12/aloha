@@ -14,7 +14,7 @@ class Cohpout:
     def __init__(self,
                  filepath='.',
                  d={},
-                 element_index=0,
+                 #element_index=0,
                 ):
         COHPCAR_path = filepath+"/COHPCAR.lobster"
         POSCAR_path = filepath+"/POSCAR"
@@ -65,10 +65,6 @@ class Cohpout:
                 print("{} \t {} \t {} \t {} \t".format(label,info[label]['pair'],round(float(-info[label]['icohp']),5),round(float(info[label]['length']),5)))
                 icohp_sum.append(round(float(-info[label]['icohp']),5))
             print("\t -ICOHP sum:\t {} ".format(sum(icohp_sum)))
-            #print("label {}: {} distance: {}  -ICOHP: {}".format(label,info[label]['pair'],round(float(info[label]['length']),5),round(float(-info[label]['icohp']),5)))
-            #db.append([label,info[label]['pair'],round(float(info[label]['length']),5),round(float(-info[label]['icohp']),5)])
-            # df=pd.DataFrame(columns=['label','bond pair','distance','-ICOHP'],data=db)
-            # display(df)
             
             d=info.copy()
             """ """
@@ -250,7 +246,6 @@ class Cohpout:
         return self.d[label]['lm_orbital']
 
     def pcohp(self, label=None, lm_orbital=None, summed_spin_channels=True):
-        #p_d={}
         if isinstance(lm_orbital,dict):
             print("label \t pair     \t -ICOHP     \t")
         else:
