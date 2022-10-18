@@ -236,16 +236,18 @@ class Cohpout:
             
             dat_label=data_label[i]
             
+            zero = lambda x : abs(x) if abs(x)==0.000 else x
+        
             if isinstance(lm_orbital,dict):
                 if summed_spin_channels:
-                    print(f"{label} \t {dat_label} \t {float(-icohps_list[0]):5f} \t")
+                    print(f"{label} \t {dat_label} \t {zero(float(-icohps_list[0])):5f} \t")
                 else:
-                    print(f"{label} \t {dat_label} \t {float(-icohps_list[0]):5f}     \t {float(-icohps_list[1]):5f}")
+                    print(f"{label} \t {dat_label} \t {zero(float(-icohps_list[0])):5f}     \t {zero(float(-icohps_list[1])):5f}")
             else:
                 if summed_spin_channels:
-                    print(f"{label} \t {dat_label} \t {float(-icohps_list[0]):5f}    \t {self.d[label]['length']:5f}")
+                    print(f"{label} \t {dat_label} \t {zero(float(-icohps_list[0])):5f}    \t {self.d[label]['length']:5f}")
                 else:
-                    print(f"{label} \t {dat_label} \t {float(-icohps_list[0]):5f}    \t {float(-icohps_list[1]):5f}     \t {round(self.d[label]['length'],5)}")
+                    print(f"{label} \t {dat_label} \t {zero(float(-icohps_list[0])):5f}    \t {zero(float(-icohps_list[1])):5f}     \t {round(self.d[label]['length'],5)}")
             if summed_spin_channels:
                 self.d[label]['lm_orbital'][key]={
                     "dat_label":dat_label,
