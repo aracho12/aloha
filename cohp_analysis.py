@@ -6,6 +6,9 @@ from pymatgen.electronic_structure.core import Spin
 import itertools
 from ase.io import read
 
+orbital_order={'1s':0,'2s':1,'2p':2,'3s':3,'3p':4,'4s':5,'3d':6,'4p':7,'5s':8,'4d':9,'5p':10,'6s':11,'4f':12,
+               '5d':13,'6p':14,'7s':15,'5f':16,'6d':17,'7p':18}
+
 def rm_num(string):
     new=''.join([i for i in string if not i.isdigit()])
     return new
@@ -72,6 +75,7 @@ class Cohpout:
                 for i in range(len(ele_orb)):
                     n=int(ele_orb[i][0])
                     n_orb=ele_orb[i][1]
+                    #print(n_orb)
                     if n_orb == 's':
                         d[label][elem]['s_orb']=[(n,"s")]
                     if n_orb == 'p':
@@ -80,6 +84,7 @@ class Cohpout:
                         d[label][elem]['d_orb']=[(n,"dxy"),(n,"dyz"),(n,"dz2"),(n,"dxz"),(n,"dx2")]
                     if n_orb == 'f':
                         d[label][elem]['f_orb']=[(n,"f_3"),(n,"f_2"),(n,"f_3"),(n,"f0"),(n,"f1"),(n,"f2"),(n,"f3")]
+                d[label][elem]["tot_orb"]=sorted(ele_orb, key=lambda x : orbital_order[str(x[0])+str(x[1])])
             self.d=d
 
 
@@ -118,19 +123,18 @@ class Cohpout:
 
         for elem in elements:
             e_temp=[]
-            #print(pcohp_d[rm_num(elem)])
             if pcohp_d[rm_num(elem)]=="default":
-                num=len(self.d[label][elem].keys()) # extract only element (remove element's index number)
-                if num == 2:
+                orb=self.d[label][elem]["tot_orb"][-1][1]
+                if orb == 's':
                     e_temp.extend(self.d[label][elem]['s_orb'])
                     porb.append('s')
-                elif num == 3: 
+                elif orb == 'p': 
                     e_temp.extend(self.d[label][elem]['p_orb'])
                     porb.append('p')
-                elif num == 4:
+                elif orb == 'd':
                     e_temp.extend(self.d[label][elem]['d_orb'])
                     porb.append('d')
-                elif num == 5:
+                elif orb == 'f':
                     e_temp.extend(self.d[label][elem]['f_orb'])
                     porb.append('f')
             else:
@@ -140,34 +144,22 @@ class Cohpout:
                     lm_list=pcohp_d[rm_num(elem)]
                 for lm in lm_list:
                     if lm in ['s','p','d','f']:
+                        print(lm)
                         num=0
                         if lm == 's':
-                            num=2
-                        elif lm =='p':
-                            num=3
-                        elif lm == 'd':
-                            num=4
-                        elif lm == 'f':
-                            num=5
-
-                        if num == 2:
                             e_temp.extend(self.d[label][elem]['s_orb'])
-                            porb.append('s')
-                        elif num == 3: 
+                        elif lm =='p':
                             e_temp.extend(self.d[label][elem]['p_orb'])
-                            porb.append('p')
-                        elif num == 4:
+                        elif lm == 'd':
                             e_temp.extend(self.d[label][elem]['d_orb'])
-                            porb.append('d')
-                        elif num == 5:
+                        elif lm == 'f':
                             e_temp.extend(self.d[label][elem]['f_orb'])
-                            porb.append('f')
                     else:
                         for orbital in self.d[label][elem].keys():
                             if orbital == 'tot_orb':
                                 pass
                             else:
-                                e_temp.extend([(n, orbital) for n, orbital in self.d[label][elem][orbital] if orbital ==lm])
+                                e_temp.extend([(n, orbital) for n, orbital in self.d[label][elem][orbital] if orbital == lm])
             e.append(e_temp)
         # print(e)
         e1=e[0]
@@ -202,6 +194,7 @@ class Cohpout:
                     label_list.append([label for i in range(len(orbital_temp))])
                     data_label.append(f'{rm_num(elements[0])}({x[1]})-{rm_num(elements[1])}({y[1]})')
             data_label.append(f'{rm_num(elements[0])}({e1[0][1][0]})-{rm_num(elements[1])}({e2[0][1][0]})')
+        
         # print(orbital_list)
         # print(label_list)
         # print(data_label)
