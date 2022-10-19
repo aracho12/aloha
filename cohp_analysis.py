@@ -152,16 +152,12 @@ class Cohpout:
 
                         if num == 2:
                             e_temp.extend(self.d[label][elem]['s_orb'])
-                            porb.append('s')
                         elif num == 3: 
                             e_temp.extend(self.d[label][elem]['p_orb'])
-                            porb.append('p')
                         elif num == 4:
                             e_temp.extend(self.d[label][elem]['d_orb'])
-                            porb.append('d')
                         elif num == 5:
                             e_temp.extend(self.d[label][elem]['f_orb'])
-                            porb.append('f')
                     else:
                         for orbital in self.d[label][elem].keys():
                             if orbital == 'tot_orb':
@@ -202,6 +198,7 @@ class Cohpout:
                     label_list.append([label for i in range(len(orbital_temp))])
                     data_label.append(f'{rm_num(elements[0])}({x[1]})-{rm_num(elements[1])}({y[1]})')
             data_label.append(f'{rm_num(elements[0])}({e1[0][1][0]})-{rm_num(elements[1])}({e2[0][1][0]})')
+        
         # print(orbital_list)
         # print(label_list)
         # print(data_label)
