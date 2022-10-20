@@ -148,19 +148,11 @@ class Cohpout:
                         num=0
                         if lm == 's':
                             e_temp.extend(self.d[label][elem]['s_orb'])
-<<<<<<< HEAD
                         elif lm =='p':
                             e_temp.extend(self.d[label][elem]['p_orb'])
                         elif lm == 'd':
                             e_temp.extend(self.d[label][elem]['d_orb'])
                         elif lm == 'f':
-=======
-                        elif num == 3: 
-                            e_temp.extend(self.d[label][elem]['p_orb'])
-                        elif num == 4:
-                            e_temp.extend(self.d[label][elem]['d_orb'])
-                        elif num == 5:
->>>>>>> be781ed4136817a1ab5328ced331577e1afb5269
                             e_temp.extend(self.d[label][elem]['f_orb'])
                     else:
                         for orbital in self.d[label][elem].keys():
