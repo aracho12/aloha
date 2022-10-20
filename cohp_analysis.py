@@ -280,10 +280,6 @@ class Cohpout:
                 pcohp=self.get_pcohp(label=label,lm_orbital=lm_orbital,summed_spin_channels=summed_spin_channels)
                 if not isinstance(lm_orbital, dict):
                     icohp_sum.extend(pcohp[1]["icohp"])
-            if summed_spin_channels:
-                print("\t-ICOHP sum:\t{}".format(round(-sum(icohp_sum),5)))
-            else:
-                print(f"\t-ICOHP sum:\t{-sum(icohp_sum[0::2]):5f} \t {-sum(icohp_sum[1::2]):5f}")
         else:
             if isinstance(label,list):
                 icohp_sum=[]
@@ -292,10 +288,6 @@ class Cohpout:
                     pcohp=self.get_pcohp(label=lb,lm_orbital=lm_orbital,summed_spin_channels=summed_spin_channels)
                     if not isinstance(lm_orbital, dict):
                         icohp_sum.extend(pcohp[1]["icohp"])
-                if summed_spin_channels:
-                    print("\t-ICOHP sum:\t{}".format(round(-sum(icohp_sum),5)))
-                else:
-                    print(f"\t-ICOHP sum:\t{-sum(icohp_sum[0::2]):5f} \t {-sum(icohp_sum[1::2]):5f}")
             else:
                 label=str(label)
                 pcohp=self.get_pcohp(label=label,lm_orbital=lm_orbital,summed_spin_channels=summed_spin_channels)
