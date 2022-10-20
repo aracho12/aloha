@@ -144,7 +144,6 @@ class Cohpout:
                     lm_list=pcohp_d[rm_num(elem)]
                 for lm in lm_list:
                     if lm in ['s','p','d','f']:
-                        print(lm)
                         num=0
                         if lm == 's':
                             e_temp.extend(self.d[label][elem]['s_orb'])
