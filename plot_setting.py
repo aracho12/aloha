@@ -60,7 +60,7 @@ options={
     'figure.frameon': True, #True
 
     'font.family': ['sans-serif'], #['sans-serif']
-    'font.sans-serif': ['Avenir','Helvetica','Arial'], 
+    'font.sans-serif': ['Avenir','Helvetica','Arial','Computer Modern Sans Serif','DejaVu Sans','Bitstream Vera Sans','Lucida Grande','Verdana','Geneva','Lucid','Avant Garde','sans-serif'], 
     #'Helvetica, Computer Modern Sans Serif, DejaVu Sans, 'Bitstream Vera Sans, Lucida Grande, Verdana, Geneva, Lucid, Arial, Avant Garde, sans-serif', 
 
     'text.latex.preamble': preamble,
