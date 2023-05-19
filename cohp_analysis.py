@@ -15,6 +15,7 @@ pd.set_option('display.max_rows', None)
 
 orbital_order={'1s':0,'2s':1,'2p':2,'3s':3,'3p':4,'4s':5,'3d':6,'4p':7,'5s':8,'4d':9,'5p':10,'6s':11,'4f':12,
                '5d':13,'6p':14,'7s':15,'5f':16,'6d':17,'7p':18}
+metal_elements = ['Li', 'Be', 'Na', 'Mg', 'Al', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As', 'Se', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc', 'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu', 'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta', 'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi']
 
 def rm_num(string):
     new=''.join([i for i in string if not i.isdigit()])
@@ -194,7 +195,7 @@ class Cohpout:
         order = self._get_order(elements, lm_orbital)
         data_label, orbital_list, label_list = self._get_label_and_orbital_lists(elements, e, label, order)
         self.d[label]['lm_orbital'] = {}
-        icohp_sum = []
+        icohps_list = []
         key = 1
         data_list= []
         for i in range(len(label_list)):
@@ -205,17 +206,17 @@ class Cohpout:
             e_fermi=cohpd["efermi"]
             energies=cohpd["energies"]
             spins=[Spin.up] if summed_spin_channels else [Spin.up,Spin.down]
-            icohps_list=[]
+            icohp_sum_temp=[]
 
             for spin in spins:
                 for j in range(len(energies)):
                     if energies[j]==e_fermi:
                         icohp=float(icohps[spin][j])
                         icohp=round(icohp,5)
-                        icohps_list.append(icohp)
+                        icohp_sum_temp.append(icohp)
             dat_label=data_label[i]
 
-            icohp_sum.extend(icohps_list)
+            icohps_list.extend(icohp_sum_temp)
 
             dat_label = data_label[i]
             zero = lambda x: abs(x) if abs(x) == 0.000 else x
@@ -228,48 +229,76 @@ class Cohpout:
                 'pair': dat_label,
             }
             if summed_spin_channels:
-                row['-ICOHP'] = -icohps_list[0]
+                row['-ICOHP'] = -icohp_sum_temp[0]
             else:
-                row['-ICOHP(up)'] = -icohps_list[0]
-                row['-ICOHP(down)'] = -icohps_list[1]
+                row['-ICOHP(up)'] = -icohp_sum_temp[0]
+                row['-ICOHP(down)'] = -icohp_sum_temp[1]
             row['distance'] = self.d[label]['length']
-            data_list.append(row)
             
             self.d[label]['lm_orbital'][key] = {
                 "dat_label": dat_label,
-                "-ICOHP": [-icohps_list[0] if summed_spin_channels else -icohps_list][0],
                 "pcohp": pcohp
             }
+            if summed_spin_channels:
+                self.d[label]['lm_orbital'][key]["-ICOHP"] = -icohp_sum_temp[0]
+            else:
+                self.d[label]['lm_orbital'][key]["-ICOHP(up)"] = -icohp_sum_temp[0]
+                self.d[label]['lm_orbital'][key]["-ICOHP(down)"] = -icohp_sum_temp[1]
+            data_list.append(row)
             key += 1
-
+        icohp_sum=[]
+        if summed_spin_channels:
+            icohp_sum.append(-sum(icohps_list))
+        else:
+            icohp_sum.append(-sum(icohps_list[0::2]))
+            icohp_sum.append(-sum(icohps_list[1::2]))
         df = pd.DataFrame(data_list)
+        # add icohp_sum_all to dataframe
+        for i in range(len(label_list)):
+            if isinstance(lm_orbital, dict):
+                if summed_spin_channels:
+                    df.loc[i, '-ICOHP_sum'] = icohp_sum[0]
+                else:
+                    df.loc[i, '-ICOHP_sum(up)'] = icohp_sum[0]
+                    df.loc[i, '-ICOHP_sum(down)'] = icohp_sum[1]
+        
         # print(df)
         return df, icohp_sum
 
     """ print pCOHP """
 
-    def pcohp(self, label=None, lm_orbital=None, summed_spin_channels=True, sort_by=None):
+    def pcohp(self, label=None, lm_orbital=None, summed_spin_channels=True, sort_by=None, index=None):
         df_list = []
-        icohp_sum_all = []
+        icohp_sum_list=[]
+        if isinstance(index,int):
+            # find label if index in self.d[label]["elem1_idx"] or self.d[label]["elem2_idx"]
+            labels=[]
+            for label in self.d.keys():
+                if index in [self.d[label]["elem1_idx"], self.d[label]["elem2_idx"]]:
+                    labels.append(label)
+            label=labels
         if label is None:
             labels = list(self.d.keys())
         elif isinstance(label, list):
             labels = label
         else:
             labels = [label]
+
         for lb in labels:
             lb = str(lb)
             df, icohp_sum = self._get_pcohp(label=lb, lm_orbital=lm_orbital, summed_spin_channels=summed_spin_channels)
             df_list.append(df)
-            if not isinstance(lm_orbital, dict):
-                icohp_sum_all.extend(icohp_sum)
+            # if not isinstance(lm_orbital, dict):
+            icohp_sum_list.extend(icohp_sum)
+            
         df_total = pd.concat(df_list)
+
         if sort_by is not None:
             df_total = df_total.sort_values(by=[sort_by,'label'])
 
         print(df_total.to_string(index=False))
-        if not isinstance(lm_orbital, dict):
-            print(f"\t    -ICOHP sum:\t {-sum(icohp_sum):5f}\n")
+        # if not isinstance(lm_orbital, dict):
+        print(f"\t\t\t   -ICOHP sum: {sum(icohp_sum_list):5f}\n")
         return df_total
     
     def print_all(self, sort_by=None):
@@ -287,3 +316,11 @@ class Cohpout:
 
 if __name__ == "__main__":
     pass
+
+# Example
+# cohpout=Cohpout()
+# metal_indices=[i for i in range(len(cohpout.atoms)) if cohpout.atoms[i].symbol in metal_elements]
+# for i, metal_index in enumerate(metal_indices):
+#     metal=cohpout.atoms[metal_index].symbol
+#     print(f"{i}: {metal}({metal_index})")
+#     cohpout.pcohp(lm_orbital={metal:'d'}, index=metal_index)
