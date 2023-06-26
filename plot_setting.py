@@ -110,6 +110,8 @@ options={
 matplotlib.rcParams.update(options)
 
 from matplotlib.ticker import AutoMinorLocator
+from matplotlib import rcParams
+
 
 def pretty_plot(width=None, height=None, plt=None, dpi=None):
     if plt is None:
@@ -128,3 +130,61 @@ def pretty_plot(width=None, height=None, plt=None, dpi=None):
         ax.yaxis.set_minor_locator(AutoMinorLocator(2))
         ax.xaxis.set_minor_locator(AutoMinorLocator(2)) 
     return plt
+
+def pretty_subplot(
+    nrows,
+    ncols,
+    width=None,
+    height=None,
+    sharex=False,
+    sharey=True,
+    dpi=None,
+    plt=None,
+    gridspec_kw=None,
+):
+
+    if width is None:
+        width = rcParams["figure.figsize"][0]
+    if height is None:
+        height = rcParams["figure.figsize"][1]
+
+    if plt is None:
+        plt = matplotlib.pyplot
+        plt.subplots(
+            nrows,
+            ncols,
+            sharex=sharex,
+            sharey=sharey,
+            dpi=dpi,
+            figsize=(width, height),
+            facecolor="w",
+            gridspec_kw=gridspec_kw,
+        )
+
+    return plt
+
+def draw_themed_line(y, ax, orientation="horizontal"):
+    """Draw a horizontal line using the theme settings
+    Args:
+        y (float): Position of line in data coordinates
+        ax (Axes): Matplotlib Axes on which line is drawn
+    """
+
+    # Note to future developers: feel free to add plenty more optional
+    # arguments to this to mess with linestyle, zorder etc.
+    # Just .update() the options dict
+
+    themed_line_options = dict(
+        color=rcParams["grid.color"],
+        linestyle="--",
+        dashes=(5, 2),
+        zorder=0,
+        linewidth=rcParams["ytick.major.width"],
+    )
+
+    if orientation == "horizontal":
+        ax.axhline(y, **themed_line_options)
+    elif orientation == "vertical":
+        ax.axvline(y, **themed_line_options)
+    else:
+        raise ValueError(f'Line orientation "{orientation}" not supported')
