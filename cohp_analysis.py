@@ -3,10 +3,14 @@ import sys
 import os
 from pymatgen.electronic_structure.cohp import CompleteCohp, get_integrated_cohp_in_energy_range
 from pymatgen.electronic_structure.core import Spin
+from pymatgen.electronic_structure.plotter import CohpPlotter
 import itertools
 from ase.io import read
 import pandas as pd
 import numpy as np
+from matplotlib import rcParams
+import matplotlib.pyplot as plt
+from aloha import plot_setting
 
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('display.max_columns', None)
@@ -314,6 +318,176 @@ class Cohpout:
         print(df.to_string(index=False))
         print(f"ICOHP sum: {self.dataframe['-ICOHP'].sum():.5f}")
 
+
+class CohpPlot:
+    def __init__(self, d, sum_orbital=False):
+        self.d = d
+        plotter = CohpPlotter()
+        self.energies_list = []
+        self.cohp_list = []
+        self.icohp_list = []
+        self.dat_label_list = []
+        for key in self.d.keys():
+            if 'lm_orbital' in self.d[key]:
+                for i in self.d[key]['lm_orbital'].keys():
+                    self._cohp = self.d[key]['lm_orbital'][i]['pcohp']
+                    self.dat_label = self.d[key]['lm_orbital'][i]['dat_label']
+                    self.icohp = self.d[key]['lm_orbital'][i]['-ICOHP']
+                    plotter.add_cohp(self.dat_label, self._cohp)
+                    self.cohp = plotter
+                    self.energies_list.append(self.cohp._cohps[self.dat_label]["energies"])
+                    self.cohp_list.append(self.cohp._cohps[self.dat_label]["COHP"])
+                    self.icohp_list.append(self.cohp._cohps[self.dat_label]["ICOHP"])
+                    self.dat_label_list.append(self.dat_label)
+        if sum_orbital:
+            self._sum_orbital()
+
+    def _sum_orbital(self):
+        self.energies_list = self.energies_list[:1]
+        for spin in [Spin.up, Spin.down]:
+            for i in range(len(self.cohp_list)):
+                if spin in self.cohp_list[i]:
+                    self.cohp_list[0][spin] += self.cohp_list[i][spin]
+            for i in range(len(self.icohp_list)):
+                if spin in self.icohp_list[i]:
+                    self.icohp_list[0][spin] += self.icohp_list[i][spin]
+        self.dat_label_list = self.dat_label_list[:1]
+        
+    def plot(self,
+                  subplot=True,
+                  width=None,
+                  height=None,
+                  dpi=300,
+                  xlim=10,
+                  ylim=None,
+                  fill=True,
+                  spins = [Spin.up, Spin.down],
+                  plot_negative=True,
+                  colors=None,
+                  legend_on=True,
+                  plt=None,
+                  linewidth=1.0,
+                  legend_frame_on=False,
+                  img_format="png",
+                  save_files=True,
+                  filename="cohp_plot",
+                    ):
+        
+        if subplot:
+            plt = plot_setting.pretty_subplot(1,2,width=width,height=height,dpi=dpi,gridspec_kw=({'wspace': 0.0}),
+                                              sharey=True, plt=plt)
+        else:
+            plt = plot_setting.pretty_plot(width=width,height=height,dpi=dpi, plt=plt)
+
+        if colors is None:
+            cycler_obj = plt.rcParams['axes.prop_cycle']
+            colors = [item['color'] for item in cycler_obj]
+
+        fig = plt.gcf()
+
+        for i, dat_label in enumerate(self.dat_label_list):
+            print(dat_label)
+            energies = self.energies_list[i]
+            cohp = self.cohp_list[i]
+            icohp = self.icohp_list[i]
+
+            if subplot:
+                ax1 = fig.axes[0]
+                ax2 = fig.axes[1]
+                cohps=[cohp, icohp]
+                axs=[ax1,ax2]
+            else:
+                ax1 = fig.axes[0]
+                cohps=[cohp]
+                axs=[ax1]
+            
+            for spin in [Spin.up, Spin.down]:
+                y = energies
+                # print('spin:',spin)
+                if spin in cohp:
+                    x1 = -cohp[spin] if plot_negative else cohp[spin]
+                    ax1.plot(x1, y, label=str(dat_label),color=colors[i],linewidth=linewidth)
+
+                if len(cohps) == 2:
+                    # print('icohp')
+                    # print(spin)
+                    if spin in icohp:
+                        x2 = -icohp[spin] if plot_negative else icohp[spin]
+                        ax2.plot(x2, y, label=str(dat_label), color=colors[i], linewidth=linewidth)
+                        plot_setting.draw_themed_line(0, ax2, orientation="horizontal")
+
+                        for i in range(len(energies)):
+                            if energies[i] == 0.0:
+                                icohpf=icohp[spin][i]
+                        ax2.plot(-icohpf, 0, marker='o',fillstyle='full', markerfacecolor='white', markersize=4, color = 'k')
+            
+        loc = "upper right" if subplot else "upper right"
+        ncol = 1 if subplot else num_columns    
+
+
+        if legend_on:
+            if subplot:
+                ax2.legend(loc=loc, frameon=legend_frame_on, ncol=ncol)
+            else:
+                ax1.legend(loc=loc, frameon=legend_frame_on, ncol=ncol)
+
+
+        # plot(ax1, xmin=-xmax1,xmax=xmax1)
+        ax1.set_ylabel('${E - E}$$_\mathrm{F}$ / eV')
+        ax1.set_xlabel('$-\mathrm{pCOHP}$')
+        ax1.set_ylim(-xlim,xlim)
+        
+        fig.text(
+            0.03,
+            0.03,
+            'antibonding',
+            ha="left",
+            color=rcParams["grid.color"],
+            va="center",
+            #rotation="vertical",
+            transform=ax1.transAxes,
+        )
+        fig.text(
+            0.97,
+            0.03, #0.05
+            'bonding',
+            ha="right",
+            color=rcParams["grid.color"],
+            va="center",
+            #rotation="vertical",
+            transform=ax1.transAxes,
+        )
+        if subplot:
+            #plot(ax2, xmin=0,xmax=xmax2+0.5)
+            ax1.axvline(0, color='k',linewidth=rcParams["ytick.major.width"])
+            ax2.set_xlabel('$-\mathrm{ICOHP}$ / eV')
+            fig.subplots_adjust(hspace=0)
+            leg=ax2.legend()
+            for line in leg.get_lines():
+                line.set_linewidth(2.0)
+        plt.show()
+
+        if save_files:
+            fig.savefig(filename, dpi=dpi, bbox_inches="tight")
+            print(f"Figure saved as {filename}")
+
+            # data save as filename.tsv
+            filename = filename.split(".")[0]
+            dat_filename = filename + ".tsv"
+            with open(dat_filename, "w") as f:
+                f.write("# E-Ef / eV\tCOHP / eV\tICOHP / eV\n")
+                for i, dat_label in enumerate(self.dat_label_list):
+                    energies = self.energies_list[i]
+                    cohp = self.cohp_list[i]
+                    icohp = self.icohp_list[i]
+                    for j in range(len(energies)):
+                        if spin in cohp:
+                            x1 = -cohp[spin] if plot_negative else cohp[spin]
+                        if spin in icohp:
+                            x2 = -icohp[spin] if plot_negative else icohp[spin]
+                        f.write(f"{energies[j]:.5f}\t{x1[j]:.5f}\t{x2[j]:.5f}\n")
+            print(f"Data saved as {dat_filename}")
+
 if __name__ == "__main__":
     pass
 
@@ -324,3 +498,8 @@ if __name__ == "__main__":
 #     metal=cohpout.atoms[metal_index].symbol
 #     print(f"{i}: {metal}({metal_index})")
 #     cohpout.pcohp(lm_orbital={metal:'d'}, index=metal_index)
+
+
+# Plot Example
+# cohpout=Cohpout()
+# CohpPlot(cohpout.pcohp(index=22),sum_orbital=True).plot(filename='cohp.png')
