@@ -303,7 +303,7 @@ class Cohpout:
         print(df_total.to_string(index=False))
         # if not isinstance(lm_orbital, dict):
         print(f"\t\t\t   -ICOHP sum: {sum(icohp_sum_list):5f}\n")
-        return df_total
+        return self.d
     
     def print_all(self, sort_by=None):
         """Print all labels and ICOHP values for all orbitals."""
@@ -317,7 +317,6 @@ class Cohpout:
             df = df.sort_values(by=[sort_by,'label'])
         print(df.to_string(index=False))
         print(f"ICOHP sum: {self.dataframe['-ICOHP'].sum():.5f}")
-
 
 class CohpPlot:
     def __init__(self, d, sum_orbital=False):
