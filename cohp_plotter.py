@@ -1,5 +1,5 @@
-from aloha_cohp.cohp_analysis import *
-from aloha_cohp import plot_setting
+from aloha.cohp_analysis import *
+from aloha import plot_setting
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import re

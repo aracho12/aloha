@@ -1,6 +1,6 @@
-from aloha_cohp.cohp_analysis import *
-from aloha_cohp import plot_setting
-from aloha_cohp.cohp_plotter import CohpPlot
+from aloha.cohp_analysis import *
+from aloha import plot_setting
+from aloha.cohp_plotter import CohpPlot
 import os
 
 
