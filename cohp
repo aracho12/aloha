@@ -1,0 +1,163 @@
+#!/usr/bin/env python
+from aloha_cohp.cohp_analysis import *
+from aloha_cohp import plot_setting
+from aloha_cohp.cohp_plotter import CohpPlot
+import argparse
+import logging
+import sys
+import os
+
+def get_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-l', '--label', 
+        default=None, 
+        type=str, 
+        help='label of the COHP file'
+        )
+    parser.add_argument(
+        '-a', '--all', 
+        default=False, 
+        action='store_true',
+        help='print all COHPs'
+        )
+    parser.add_argument(
+        '-o', '--orbital', 
+        default=None, 
+        type=str, 
+        nargs='+',
+        help='Cr.d, O.p, Cr.dx2.dxy, Cr.t2g.eg etc.'
+        )
+    parser.add_argument(
+        '-s', '--summed_spin', 
+        default=True, 
+        action='store_false',
+        help='summed spin'
+        )
+    parser.add_argument(
+        '-i', '--index', 
+        default=None, 
+        type=int,
+        help='index of atoms; start from 0'
+        )
+    parser.add_argument(
+        '-srt', '--sort', 
+        default=None, 
+        type=str,
+        help="sort by 'label','idx1','idx2', '-ICOHP', '-ICOHP(up)', '-ICOHP(down)', 'distance' "
+        )
+    parser.add_argument(
+        '-sym', '--symbol', 
+        default=None, 
+        type=str,
+        help="filtered by symbol; e.g. 'Cr', 'O' "
+        )   
+    
+    parser.add_argument('-p','--plot', default=False, action='store_true', dest='show_figure', help="generate figure")
+    # plotter
+    parser.add_argument('--width', default=3, type=float, help="width of the figure")
+    parser.add_argument('--height', default=4, type=float, help="height of the figure")   
+    parser.add_argument('--dpi', default=300, type=int, help="dpi of the figure")
+    parser.add_argument('--xmin', default=-13, type=float, help="xmin of the figure")
+    parser.add_argument('--xmax', default=13, type=float, help="xmax of the figure")
+    parser.add_argument('--ymin', default=None, type=float, help="ymin of the figure")
+    parser.add_argument('--ymax', default=None, type=float, help="ymax of the figure")
+    parser.add_argument('--no-icohp', default=False, action='store_true', dest='no_icohp', help="hide ICOHP in the legend")
+    parser.add_argument('--plot-negative', default=True, action='store_true', dest='plot_negative', help="plot negative COHP")
+    parser.add_argument('--colors', default=None, type=str, help="colors of the COHPs")
+    parser.add_argument('--legend-in', default=False, action='store_true', dest='legend_in', help="legend inside upper right")
+    parser.add_argument('--legend-off', default=False, action='store_true', dest='legend_off', help="legend off")
+    parser.add_argument('--legend-frame-on', default=True, action='store_true', dest='legend_frame_on', help="legend frame on")
+    parser.add_argument('--plt', default=None, type=str, help="plt")
+    parser.add_argument('-save','--save', default=True, action='store_true', dest='save_files', help="save files")
+    parser.add_argument('--filename', default='cohp.png', type=str, help="filename")
+    parser.add_argument('--grid-spec', default=({'wspace': 0.0}), type=dict, help="grid spec")
+    parser.add_argument('--linewidth', default=0.7, type=float, help="linewidth")
+
+    return parser
+
+
+def main():
+    args = get_parser().parse_args()
+    logging.basicConfig(
+        filename="cohp-analysis.log",
+        level=logging.INFO,
+        filemode="w",
+        format="%(message)s",
+    )
+    console = logging.StreamHandler()
+    logging.info(" ".join(sys.argv[:]))
+    logging.getLogger("").addHandler(console)
+
+    if args.orbital is not None:
+        orbitals = {}
+        if len(args.orbital)>2:
+            print('Error: orbital should be like Cr.d, O.p, Cr.dx2.dxy, Cr.t2g.eg etc.')
+            sys.exit()
+        for orbs in args.orbital:
+            ele = orbs.split('.')[0]
+            orb = orbs.split('.')[1:]
+            orbitals[ele] = orb
+        args.orbital = orbitals
+
+    if args.no_icohp:
+        show_icohp = False
+    else:
+        show_icohp = True
+
+    if args.legend_in:
+        legend_out = False
+    else:
+        legend_out = True
+    
+    if args.legend_off:
+        legend_on = False
+    else:
+        legend_on = True
+
+    COHP = Cohpout()
+
+    if args.all:
+        COHP.print_all()
+
+    if args.show_figure:
+        CohpPlot(COHP.pcohp(
+                    label=args.label, 
+                    orbital=args.orbital, 
+                    summed_spin=args.summed_spin, 
+                    sort_by=args.sort, 
+                    index=args.index, 
+                    symbol=args.symbol
+                    )
+            ).plot(
+            prefix=None,
+            width=args.width,
+            height=args.height,
+            dpi=args.dpi,
+            xmin=args.xmin,
+            xmax=args.xmax,
+            ymin=args.ymin,
+            ymax=args.ymax,
+            show_icohp=show_icohp, # True: show ICOHP in the legend
+            plot_negative=True,
+            colors=None,
+            legend_out=legend_out, # True: outside upper right, default: inside upper right
+            legend_on=legend_on,
+            legend_frame_on=True,
+            plt=None,
+            save_files=args.save_files,
+            filename=args.filename,
+            grid_spec=({'wspace': 0.0}),
+            linewidth=args.linewidth)
+    else:
+        COHP.pcohp(
+                    label=args.label, 
+                    orbital=args.orbital, 
+                    summed_spin=args.summed_spin, 
+                    sort_by=args.sort, 
+                    index=args.index, 
+                    symbol=args.symbol
+                    )
+
+if __name__ == "__main__":
+    main()
