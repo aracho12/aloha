@@ -20,7 +20,13 @@ class CohpPlot:
             self.pcohp=self._sum_labels()
         
         self.filename='cohp.png'
-
+        
+        dat_num = 0
+        for i, label in enumerate(self.pcohp.keys()):
+            for j in self.pcohp[label].keys():
+                dat_num += 1
+        self.dat_num = dat_num
+        self.label_num = len(list(self.pcohp.keys()))
     def _sum_orbital(self):             
         self.energies_list = self.energies_list[:1]
         for spin in [Spin.up, Spin.down]:
@@ -109,7 +115,7 @@ class CohpPlot:
         """
         if filename is None:
             filename = self.filename
-
+        
         spins = ["Spin.up", "Spin.down"]
         num_columns=len(self.pcohp.keys())
         plt = self._subplot(width=width, height=height, dpi=dpi, plt=plt, gridspec_kw=grid_spec)
@@ -123,8 +129,8 @@ class CohpPlot:
         ax1 = fig.axes[0]
         ax2 = fig.axes[1]
         for i, label in enumerate(self.pcohp.keys()):
-            for j in self.pcohp[label].keys():
-                cp = self.pcohp[label][j]
+            for k, key in enumerate(self.pcohp[label].keys()):
+                cp = self.pcohp[label][key]
                 cohp = cp.cohp
                 icohp = cp.icohp
                 data_label = cp.data_label
@@ -138,6 +144,8 @@ class CohpPlot:
                 else:
                     marker = ['^','v']
                 for j, spin in enumerate(spins):
+                    if self.label_num == 1:
+                        i=k
                     if spin in cohp:
                         x = -cohp[spin] if plot_negative else cohp[spin]
                         if spin == "Spin.up":
@@ -176,10 +184,20 @@ class CohpPlot:
             ax2.set_xlim(0,)
         else:
             ax2.axvline(0, color='k',linewidth=rcParams["ytick.major.width"])
+
+        if self.dat_num > 2:
+            legendfontsize = 6
+            legend_out = True
+            if self.dat_num > 10:
+                legendfontsize = 4
+        else:
+            legendfontsize = 6
+            legend_out = False
+
         if legend_on:
-            ax2.legend(fontsize=6)
+            ax2.legend(fontsize=legendfontsize)
         if legend_out:
-            ax2.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0, fontsize=6)
+            ax2.legend(bbox_to_anchor=(1.02, 1), loc='upper left', borderaxespad=0, fontsize=legendfontsize)
         ax2.set_xlabel('$-\mathrm{ICOHP}$ / eV')
         plt.show()
 

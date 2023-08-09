@@ -3,27 +3,20 @@ from aloha import plot_setting
 from aloha.cohp_plotter import CohpPlot
 import os
 
-
-
-# one
-# COHP = Cohpout()
-# if os.path.isfile('COHPCAR.lobster'):
-#     CohpPlot(COHP.pcohp(),sum_labels=self.sum_labels
-#             ).plot()
-# else:
-#     print('COHPCAR.lobster does not exist')
-
-
-
-# two
+"""
+TODO:
+    1. add a function to remove duplicate values (only unique values are kept)
+"""
 class Cohpplot:
-    def __init__(self, sum_labels=False, 
+    def __init__(self, filepath='.',
+                sum_labels=False, 
                 summed_spin=True,
                 label=None, 
                 orbital=None,
                 sort_by=None, 
                 index=None, 
                 symbol=None):
+        self.filepath = filepath
         self.sum_labels = sum_labels
         self.summed_spin = summed_spin
         self.label=label
@@ -35,7 +28,7 @@ class Cohpplot:
         self.plot_cohp()
     
     def plot_cohp(self):
-        COHP = Cohpout()
+        COHP = Cohpout(filepath=self.filepath)
         if os.path.isfile('COHPCAR.lobster'):
             CohpPlot(COHP.pcohp(summed_spin=self.summed_spin,
                                 label=self.label,
@@ -45,7 +38,7 @@ class Cohpplot:
                                 symbol=self.symbol,
                                 )
                      ,sum_labels=self.sum_labels
-                    ).plot()
+                    ).plot(dpi=250)
         else:
             print('COHPCAR.lobster does not exist')
  

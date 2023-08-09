@@ -395,6 +395,11 @@ class Cohpout:
             for label in self.dict.keys():
                 if index in [ self.dict[label]['idx1'], self.dict[label]['idx2']]:
                     labels.append(label)
+        elif isinstance(index, list):
+            labels=[]
+            for label in self.dict.keys():
+                if self.dict[label]['idx1'] in index or self.dict[label]['idx2'] in index:
+                    labels.append(label)
         elif isinstance(symbol, str):
             labels=[]
             for label in self.dict.keys():
@@ -406,12 +411,16 @@ class Cohpout:
             labels=[label]
         elif isinstance(label, list):
             labels=label
+        elif isinstance(label,int):
+            labels=[str(label)]
+        else:
+            raise ValueError("label must be str or list of str.")
 
         data=[]
         icohp_sum={}
         for label in labels:
-            icohp_sum[label]={'Spin.up':[]} if summed_spin else {'Spin.up':[],'Spin.down':[]}
             label = str(label)
+            icohp_sum[label]={'Spin.up':[]} if summed_spin else {'Spin.up':[],'Spin.down':[]}
             pcohp[label]={}
             data_label, label_list, orbital_list=self._get_pcohp(label,orbital=orbital, summed_spin=summed_spin)
             if not isinstance(label_list[0], list):

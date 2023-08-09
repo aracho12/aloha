@@ -15,7 +15,14 @@ colors=[
     "#7847a2", #purple
     '#FF4081', #pink
     '#455A64', #blue grey
-    '#b3b3b3' #grey
+    '#b3b3b3', #grey
+    '#045275', #dark blue
+    '#089099', #dark cyan
+    '#7CCBA2', #light green
+    '#FCDE9C', #light orange
+    '#F0746E',  #orange
+    '#DC3977', #dark pink
+    '#7C1D6F', #dark purple
 ]
 
 preamble  = r"""
