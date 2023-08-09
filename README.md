@@ -1,6 +1,13 @@
 # aloha
 aloha!
 
-helpful script to analyze the results of dft calculations.
+`pip install monty`  
+`pip install mendeleev`  
+`git clone https://github.com/aracho12/aloha.git`  
 
-cohp --help / -h
+
+in Jupyter notebook
+`from aloha.cohpplot import * `
+
+in Terminal
+`cohp --help / -h`
