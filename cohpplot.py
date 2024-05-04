@@ -29,7 +29,7 @@ class Cohpplot:
     
     def plot_cohp(self):
         COHP = Cohpout(filepath=self.filepath)
-        if os.path.isfile('COHPCAR.lobster'):
+        if os.path.isfile(f'{self.filepath}/COHPCAR.lobster'):
             CohpPlot(COHP.pcohp(summed_spin=self.summed_spin,
                                 label=self.label,
                                 orbital=self.orbital,
